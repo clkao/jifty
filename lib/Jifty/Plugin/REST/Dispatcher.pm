@@ -981,8 +981,14 @@ On an internal error, throws a C<500>.
 sub run_action {
     my ($action_name) = action($1);
     Jifty::Util->require($action_name) or abort(404);
-    
-    my $args = Jifty->web->request->arguments;
+    my $req = Plack::Request->new(Jifty->web->request->env);
+    my $args;
+    if ($req->content_type =~ m|^application/json|) {
+        $args = Jifty::JSON::decode_json($req->content)
+    }
+    else {
+        $args = Jifty->web->request->arguments;
+    }
     delete $args->{''};
 
     my $action = $action_name->new( arguments => $args ) or abort(404);
