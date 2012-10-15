@@ -9,7 +9,7 @@ This is a template for your own tests. Copy it and modify it.
 
 =cut
 
-use Jifty::Test::Dist tests => 91, actual_server => 1;
+use Jifty::Test::Dist tests => 93, actual_server => 1;
 use Jifty::Test::WWW::Mechanize;
 
 my $server  = Jifty::Test->make_server;
@@ -199,6 +199,17 @@ $mech->content_lacks('Something happened!');
 
 $mech->post( $URL . '/=/action/DoSomething', { email => 'warn@email.com' } );
     
+$mech->content_contains('Warning for email');
+$mech->content_contains('Something happened!');
+
+# Test posting with JSON encoded content
+
+my $json = '{"username":"foo","password":"bar"}';
+my $req = HTTP::Request->new( 'POST', $URL . '/=/action/DoSomething' );
+$req->header( 'Content-Type' => 'application/json' );
+$req->content( '{"email":"warn@email.com"}' );
+$mech->request( $req );
+
 $mech->content_contains('Warning for email');
 $mech->content_contains('Something happened!');
 
